@@ -1,0 +1,19 @@
+<!-- <div class="section">
+  <div class="row text-center"> -->
+    <div map-lazy-load="http://maps.google.com/maps/api/js">
+      <map zoom="15" center="43.7, -79.4" default-style="false">
+        <shape name="circle" ng-repeat="(vehicleId, vehicle) in vehicles" no-watcher="true"
+          center="{{vehicle.position}}"
+          radius="15"
+          fill-Color="black"
+          fill-Opacity="1.0"
+          stroke-Color="black"
+          stroke-Opacity="1.0"
+          stroke-weight="0.001">
+        </shape>
+      </map>
+    </div>
+<!--   </div>
+</div> -->
+<!-- center="{{city.position}}"
+radius="{{vm.getRadius(city.population)}}" -->

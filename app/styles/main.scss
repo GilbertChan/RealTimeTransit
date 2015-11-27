@@ -1,0 +1,19 @@
+$icon-font-path: "../bower_components/bootstrap-sass-official/assets/fonts/bootstrap/";
+// bower:scss
+@import "bootstrap-sass-official/assets/stylesheets/_bootstrap.scss";
+// endbower
+
+.navbar > .container {
+  margin: 0px 30px;
+}
+
+map {
+  position:absolute; 
+  width:100%; 
+  height:100%;
+}
+
+/* Responsive: Portrait tablets and up */
+@media screen and (min-width: 768px) {
+  
+}
