@@ -1,19 +1,41 @@
 <!-- <div class="section">
   <div class="row text-center"> -->
     <div map-lazy-load="http://maps.google.com/maps/api/js">
-      <map zoom="15" center="43.7, -79.4" default-style="false">
+      <ng-map 
+        zoom="15" 
+        max-Zoom="17" 
+        min-Zoom="12" 
+        center="43.7, -79.4" 
+        default-style="false"
+        pan-control="true"
+        pan-control-options="{position:'BOTTOM_CENTER'}"
+        map-type-control="false"
+        map-type-control-options="{style:'DROPDOWN_MENU', position:'TOP_LEFT'}"
+        zoom-control="true"
+        zoom-control-options="{style:'LARGE', position:'RIGHT_BOTTOM'}"
+        street-view-control="true"
+        street-view-control-options="{position:'RIGHT_BOTTOM'}"
+        scale-control="true">  
+        <!-- on-zoom_changed="vm.zoomChanged()"
+        on-center-changed="vm.centerChanged()"
+        on-click="vm.getRadius()"
+        draggable="true"
+        on-dragstart="vm.dragStart()"
+        on-drag="vm.drag()"
+        on-dragend="vm.dragEnd()" -->
+
         <shape name="circle" ng-repeat="(vehicleId, vehicle) in vehicles" no-watcher="true"
           center="{{vehicle.position}}"
-          radius="15"
+          radius="18"
           fill-Color="black"
           fill-Opacity="1.0"
           stroke-Color="black"
           stroke-Opacity="1.0"
           stroke-weight="0.001">
         </shape>
-      </map>
+      </ng-map>
     </div>
 <!--   </div>
 </div> -->
 <!-- center="{{city.position}}"
-radius="{{vm.getRadius(city.population)}}" -->
+radius="{{vm.getRadius(city.population)}}"
