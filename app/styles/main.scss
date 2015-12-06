@@ -13,6 +13,21 @@ ng-map {
   height:100%;
 }
 
+.gm-style-iw {
+  top: 5px !important;
+  left: 5px !important;
+  width: 100px !important;
+
+  > div {
+    max-width: 110px !important;
+  }
+
+  p {
+    margin: 0;
+    width: 100px;
+  }
+}
+
 /* Responsive: Portrait tablets and up */
 @media screen and (min-width: 768px) {
   

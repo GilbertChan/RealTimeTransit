@@ -1,21 +1,36 @@
 <!-- <div class="section">
   <div class="row text-center"> -->
-    <div map-lazy-load="http://maps.google.com/maps/api/js">
-      <ng-map 
-        zoom="15" 
-        max-Zoom="17" 
-        min-Zoom="12" 
-        center="43.7, -79.4" 
-        default-style="false"
-        pan-control="true"
-        pan-control-options="{position:'BOTTOM_CENTER'}"
-        map-type-control="false"
-        map-type-control-options="{style:'DROPDOWN_MENU', position:'TOP_LEFT'}"
-        zoom-control="true"
-        zoom-control-options="{style:'LARGE', position:'RIGHT_BOTTOM'}"
-        street-view-control="true"
-        street-view-control-options="{position:'RIGHT_BOTTOM'}"
-        scale-control="true">  
+    <!-- <div map-lazy-load="http://maps.google.com/maps/api/js"> -->
+      <!-- <ng-map 
+        zoom="{{mapOptions.zoom}}"
+        min-Zoom="{{mapOptions.minZoom}}" 
+        max-Zoom="{{mapOptions.maxZoom}}"
+        center="{{mapOptions.center}}" 
+        default-style="{{mapOptions.defaultStyle}}"
+        pan-control="{{mapOptions.panControl}}"
+        pan-control-options="{{mapOptions.panControlOptions}}"
+        map-type-control="{{mapOptions.mapTypeControl}}"
+        map-type-control-options="{{mapOptions.mapTypeControlOptions}}"
+        zoom-control="{{mapOptions.zoomControl}}"
+        zoom-control-options="mapOptions.zoomControlOptions"
+        street-view-control="{{mapOptions.streetViewControl}}"
+        street-view-control-options="{{mapOptions.streetViewControlOptions}}"
+        scale-control="{{mapOptions.scaleControl}}"> -->
+        <ng-map 
+          zoom="15" 
+          max-Zoom="17" 
+          min-Zoom="14" 
+          center="43.65012, -79.390945" 
+          default-style="false"
+          pan-control="true"
+          pan-control-options="{position:'BOTTOM_CENTER'}"
+          map-type-control="false"
+          map-type-control-options="{style:'DROPDOWN_MENU', position:'TOP_LEFT'}"
+          zoom-control="true"
+          zoom-control-options="{style:'LARGE', position:'RIGHT_BOTTOM'}"
+          street-view-control="true"
+          street-view-control-options="{position:'RIGHT_BOTTOM'}"
+          scale-control="true">  
         <!-- on-zoom_changed="vm.zoomChanged()"
         on-center-changed="vm.centerChanged()"
         on-click="vm.getRadius()"
@@ -24,17 +39,17 @@
         on-drag="vm.drag()"
         on-dragend="vm.dragEnd()" -->
 
-        <shape name="circle" ng-repeat="(vehicleId, vehicle) in vehicles" no-watcher="true"
+        <!-- <shape name="circle" ng-repeat="(vehicleId, vehicle) in vehicles" no-watcher="true"
           center="{{vehicle.position}}"
-          radius="18"
-          fill-Color="black"
-          fill-Opacity="1.0"
-          stroke-Color="black"
-          stroke-Opacity="1.0"
-          stroke-weight="0.001">
-        </shape>
+          radius="{{vehicle.radius}}"
+          fill-Color="{{vehicle.fillColor}}"
+          fill-Opacity="{{vehicle.fillOpacity}}"
+          stroke-Color="{{vehicle.strokeColor}}"
+          stroke-Opacity="{{vehicle.strokeOpacity}}"
+          stroke-weight="{{vehicle.strokeWeight}}">
+        </shape> -->
       </ng-map>
-    </div>
+    <!-- </div> -->
 <!--   </div>
 </div> -->
 <!-- center="{{city.position}}"
