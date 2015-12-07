@@ -309,17 +309,18 @@ mainControllers.controller('MainCtrl', function ($scope, $http, $interval, NgMap
 
                 arrowOptions.icon.fillOpacity = arrowOpacity;
                 arrowOptions.icon.strokeOpacity = strokeOpacity;
-                arrows[vehicle.id].setOptions({
+                arrows[vehicle.id].setPosition(newPosition);
+                arrows[vehicle.id].setIcon(arrowOptions.icon);
+                /*arrows[vehicle.id].setOptions({
                   position: newPosition,
                   icon: arrowOptions.icon
-                });
+                });*/             
 
                 vehicleArrow = arrows[vehicle.id];
 
                 google.maps.event.addListener(vehicleArrow, 'mouseover', (function(vehicleArrow, vehicle) {
                   return function() {
                     //Set info window details an create
-                    infoWindow.close();
                     infoWindow.setContent('<p><b>Route: </b> ' + vehicle.routeId + '</p><p><b>Vehicle ID:</b> ' + vehicle.id + '</p><b>Update :</b> ' + vehicle.secsSinceReport + '</p>');
                     infoWindow.setPosition(vehicleArrow.getPosition());
                     infoWindow.open(map);
@@ -330,16 +331,13 @@ mainControllers.controller('MainCtrl', function ($scope, $http, $interval, NgMap
               } else {
                 arrowOptions.icon.fillOpacity = arrowOpacity;
                 arrowOptions.icon.strokeOpacity = strokeOpacity;
-                arrows[vehicle.id].setOptions({
-                  icon: arrowOptions.icon
-                });
+                arrows[vehicle.id].setIcon(arrowOptions.icon);
 
                 vehicleArrow = arrows[vehicle.id];
 
                 google.maps.event.addListener(vehicleArrow, 'mouseover', (function(vehicleArrow, vehicle) {
                   return function() {
                     //Set info window details an create
-                    infoWindow.close();
                     infoWindow.setContent('<p><b>Route: </b> ' + vehicle.routeId + '</p><p><b>Vehicle ID:</b> ' + vehicle.id + '</p><b>Update :</b> ' + vehicle.secsSinceReport + '</p>');
                     infoWindow.setPosition(vehicleArrow.getPosition());
                     infoWindow.open(map);
