@@ -125,7 +125,7 @@ mainControllers.controller('MainCtrl', function ($scope, $http, $interval, NgMap
               var vehicleCircle = circles[vehicle.id];
               //circles[vehicle.id].setMap(map);
 
-              google.maps.event.addListener(vehicleCircle, 'click', (function(vehicleCircle, vehicle) {
+              google.maps.event.addListener(vehicleCircle, 'mouseover', (function(vehicleCircle, vehicle) {
                 return function() {
                   //Set info window details an create
                   infoWindow.setContent('<p><b>Route: </b> ' + vehicle.routeId + '</p><p><b>Vehicle ID:</b> ' + vehicle.id + '</p><b>Update :</b> ' + vehicle.secsSinceReport + '</p>');
@@ -164,9 +164,10 @@ mainControllers.controller('MainCtrl', function ($scope, $http, $interval, NgMap
 
                 var vehicleCircle = circles[vehicle.id];
 
-                google.maps.event.addListener(vehicleCircle, 'click', (function(vehicleCircle, vehicle) {
+                google.maps.event.addListener(vehicleCircle, 'mouseover', (function(vehicleCircle, vehicle) {
                   return function() {
                     //Set info window details an create
+                    infoWindow.close();
                     infoWindow.setContent('<p><b>Route: </b> ' + vehicle.routeId + '</p><p><b>Vehicle ID:</b> ' + vehicle.id + '</p><b>Update :</b> ' + vehicle.secsSinceReport + '</p>');
                     infoWindow.setPosition(vehicleCircle.getCenter());
                     infoWindow.open(map);
@@ -183,9 +184,10 @@ mainControllers.controller('MainCtrl', function ($scope, $http, $interval, NgMap
 
                 var vehicleCircle = circles[vehicle.id];
 
-                google.maps.event.addListener(vehicleCircle, 'click', (function(vehicleCircle, vehicle) {
+                google.maps.event.addListener(vehicleCircle, 'mouseover', (function(vehicleCircle, vehicle) {
                   return function() {
                     //Set info window details an create
+                    infoWindow.close();
                     infoWindow.setContent('<p><b>Route: </b> ' + vehicle.routeId + '</p><p><b>Vehicle ID:</b> ' + vehicle.id + '</p><b>Update :</b> ' + vehicle.secsSinceReport + '</p>');
                     infoWindow.setPosition(vehicleCircle.getCenter());
                     infoWindow.open(map);
