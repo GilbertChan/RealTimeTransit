@@ -107,13 +107,8 @@ mainControllers.controller('MainCtrl', function ($scope, $http, $interval, NgMap
                 lon: vehicle.lon,
                 /*position: [vehicle.lat, vehicle.lon],*/
                 routeId: vehicle.routeId,
+                heading: vehicle.heading,
                 secsSinceReport: locationAge,
-                radius: circleOptions.radius,
-                fillColor: vehicleColor,
-                fillOpacity: circleOpacity, //circleOptions.fillOpacity,
-                strokeColor: circleOptions.strokeColor,
-                strokeOpacity: strokeOpacity,
-                strokeweight: circleOptions.strokeWeight
               };
 
               //Set circle options and create circle
@@ -146,13 +141,8 @@ mainControllers.controller('MainCtrl', function ($scope, $http, $interval, NgMap
                   lon: vehicle.lon,
                   /*position: [vehicle.lat, vehicle.lon],*/
                   routeId: vehicle.routeId,
+                  heading: vehicle.heading,
                   secsSinceReport: locationAge,
-                  radius: circleOptions.radius,
-                  fillColor: vehicleColor,
-                  fillOpacity: circleOpacity,
-                  strokeColor: circleOptions.strokeColor,
-                  strokeOpacity: strokeOpacity,
-                  strokeweight: circleOptions.strokeWeight
                 };
 
                 circles[vehicle.id].setOptions({
