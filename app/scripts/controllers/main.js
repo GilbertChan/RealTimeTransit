@@ -14,23 +14,6 @@ mainControllers.controller('MainCtrl', function ($scope, $http, $interval, NgMap
   var circles = {};
   var arrows = {};
 
-  /*$scope.mapOptions = {
-    zoom: '15',
-    minZoom: '12',
-    maxZoom: '17',
-    center: '43.65012, -79.390945',
-    defaultStyle: 'false',
-    panControl: 'true',
-    panControlOptions: '{position:\'BOTTOM_CENTER\'}',
-    mapTypeControl: 'false',
-    mapTypeControlOptions: '{style:\'DROPDOWN_MENU\', position:\'TOP_LEFT\'}',
-    zoomControl: 'true',
-    zoomControlOptions: '{style:\'LARGE\', position:\'RIGHT_BOTTOM\'}',
-    streetViewControl: 'true',
-    streetViewControlOptions: '{position:\'RIGHT_BOTTOM\'}',
-    scaleControl: 'true'
-  };*/
-
   var circleOptions = {
     radius: 18,
     clickable: true,
@@ -45,9 +28,11 @@ mainControllers.controller('MainCtrl', function ($scope, $http, $interval, NgMap
       scale: 3,
       fillColor: '#008900',
       strokeColor: '#CC0000',
-      strokeWeight: 1
-    }
-};
+      strokeWeight: 1,
+    },
+    duration: 2500,
+    easing: 'easeInSine'
+  };
 
   var infoWindowOptions = {
     /*disableAutoPan: false,*/
@@ -259,6 +244,7 @@ mainControllers.controller('MainCtrl', function ($scope, $http, $interval, NgMap
             }
 
             arrowOptions.icon.rotation = parseFloat(arrowDirection);
+            arrowOptions.title = 'Route: ' + vehicle.routeId + '\nVehicle ID: ' + vehicle.id + '\nUpdate: ' + vehicle.secsSinceReport;
 
             //New Vehicle to add to the Map
             if (!(vehicle.id in $scope.vehicles)) {
@@ -278,18 +264,19 @@ mainControllers.controller('MainCtrl', function ($scope, $http, $interval, NgMap
               //arrowOptions.icon.fillColor = vehicleColor;
               arrowOptions.icon.fillOpacity = arrowOpacity;
               arrowOptions.icon.strokeOpacity = strokeOpacity;
-              arrows[vehicle.id] = new google.maps.Marker(arrowOptions);
+              //arrows[vehicle.id] = new google.maps.Marker(arrowOptions);
+              arrows[vehicle.id] = new SlidingMarker(arrowOptions);
               vehicleArrow = arrows[vehicle.id];
               //arrows[vehicle.id].setMap(map);
 
-              google.maps.event.addListener(vehicleArrow, 'mouseover', (function(vehicleArrow, vehicle) {
+              /*google.maps.event.addListener(vehicleArrow, 'mouseover', (function(vehicleArrow, vehicle) {
                 return function() {
                   //Set info window details an create
                   infoWindow.setContent('<p><b>Route: </b> ' + vehicle.routeId + '</p><p><b>Vehicle ID:</b> ' + vehicle.id + '</p><b>Update :</b> ' + vehicle.secsSinceReport + '</p>');
                   infoWindow.setPosition(vehicleArrow.getPosition());
                   infoWindow.open(map);
                 };
-              })(vehicleArrow, vehicle));
+              })(vehicleArrow, vehicle));*/
 
               //console.log('New Vehicle: ', $scope.vehicles[vehicle.id]);
             } else {
@@ -318,14 +305,14 @@ mainControllers.controller('MainCtrl', function ($scope, $http, $interval, NgMap
 
                 vehicleArrow = arrows[vehicle.id];
 
-                google.maps.event.addListener(vehicleArrow, 'mouseover', (function(vehicleArrow, vehicle) {
+                /*google.maps.event.addListener(vehicleArrow, 'mouseover', (function(vehicleArrow, vehicle) {
                   return function() {
                     //Set info window details an create
                     infoWindow.setContent('<p><b>Route: </b> ' + vehicle.routeId + '</p><p><b>Vehicle ID:</b> ' + vehicle.id + '</p><b>Update :</b> ' + vehicle.secsSinceReport + '</p>');
                     infoWindow.setPosition(vehicleArrow.getPosition());
                     infoWindow.open(map);
                   };
-                })(vehicleArrow, vehicle));
+                })(vehicleArrow, vehicle));*/
 
                 //console.log('Existing Vehicle Changed: ', $scope.vehicles[vehicle.id]);
               } else {
@@ -335,14 +322,14 @@ mainControllers.controller('MainCtrl', function ($scope, $http, $interval, NgMap
 
                 vehicleArrow = arrows[vehicle.id];
 
-                google.maps.event.addListener(vehicleArrow, 'mouseover', (function(vehicleArrow, vehicle) {
+                /*google.maps.event.addListener(vehicleArrow, 'mouseover', (function(vehicleArrow, vehicle) {
                   return function() {
                     //Set info window details an create
                     infoWindow.setContent('<p><b>Route: </b> ' + vehicle.routeId + '</p><p><b>Vehicle ID:</b> ' + vehicle.id + '</p><b>Update :</b> ' + vehicle.secsSinceReport + '</p>');
                     infoWindow.setPosition(vehicleArrow.getPosition());
                     infoWindow.open(map);
                   };
-                })(vehicleArrow, vehicle));
+                })(vehicleArrow, vehicle));*/
               }
             }
           }
