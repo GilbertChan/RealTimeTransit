@@ -14,6 +14,29 @@ mainControllers.controller('MainCtrl', function ($scope, $http, $interval, NgMap
   var circles = {};
   var arrows = {};
 
+  var startTime;
+  var dataFinishTime;
+  var finishTime;
+
+  //Get bounds of map
+  var mapBounds = null;
+  var edge = {
+      north: null, // LatLng of the north-east corner
+      east: null, // LatLng of the north-east corner
+      south: null, // LatLng of the north-east corner
+      west: null // LatLng of the north-east corner
+    };
+  var latBuffer = null;
+  var lngBuffer = null;
+  var bounds = {
+    north: null,
+    east: null,
+    south: null,
+    west: null
+  };
+
+  var vehicleData = null;
+
   var circleOptions = {
     radius: 18,
     clickable: true,
@@ -22,6 +45,7 @@ mainControllers.controller('MainCtrl', function ($scope, $http, $interval, NgMap
     strokeWeight: 2
   };
 
+  var animationDuration = 3000;
   var arrowOptions = {
     icon: {
       path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
@@ -30,7 +54,7 @@ mainControllers.controller('MainCtrl', function ($scope, $http, $interval, NgMap
       strokeColor: '#CC0000',
       strokeWeight: 1,
     },
-    duration: 2500,
+    duration: animationDuration,
     easing: 'easeInSine'
   };
 
@@ -41,30 +65,32 @@ mainControllers.controller('MainCtrl', function ($scope, $http, $interval, NgMap
 
   var infoWindow = new google.maps.InfoWindow(infoWindowOptions);
 
+  var getBorder = function(map){
+    //get visible map bounds
+    mapBounds = map.getBounds();
+    edge.north = mapBounds.getNorthEast().lat(); // LatLng of the north-east corner
+    edge.east = mapBounds.getNorthEast().lng(); // LatLng of the north-east corner
+    edge.south = mapBounds.getSouthWest().lat(); // LatLng of the north-east corner
+    edge.west = mapBounds.getSouthWest().lng(); // LatLng of the north-east corner
+    //console.log(edge.north, edge.east, edge.south, edge.west);
+    latBuffer = Math.abs(edge.north - edge.south)/3;
+    lngBuffer = Math.abs(edge.east - edge.west)/3;
+    bounds.north = edge.north + latBuffer;
+    bounds.east = edge.east + lngBuffer;
+    bounds.south = edge.south - latBuffer;
+    bounds.west = edge.west - lngBuffer;
+  };
+
   $scope.getAllVehicles = function(){
     //$http.get('http://webservices.nextbus.com/service/publicXMLFeed?command=vehicleLocations&a=ttc&t=0')
-    var startTime = new Date();
-    var dataFinishTime;
-    var finishTime;
+    startTime = new Date();
     console.log('start');
-    //Get bounds of map
-    var mapBounds = null;
-    var northBound = null;
-    var eastBound = null;
-    var southBound = null;
-    var westBound = null;
 
     NgMap.getMap().then(function(map) {
       //set the map where the circles are to be rendered
       circleOptions.map = map;
 
-      //get visible map bounds
-      mapBounds = map.getBounds();
-      northBound = mapBounds.getNorthEast().lat(); // LatLng of the north-east corner
-      eastBound = mapBounds.getNorthEast().lng(); // LatLng of the north-east corner
-      southBound = mapBounds.getSouthWest().lat(); // LatLng of the north-east corner
-      westBound = mapBounds.getSouthWest().lng(); // LatLng of the north-east corner
-      //console.log(northBound, eastBound, southBound, westBound);
+      getBorder(map);
 
       $http.get('http://restbus.info/api/agencies/ttc/vehicles')
         .success(function(data){
@@ -190,157 +216,176 @@ mainControllers.controller('MainCtrl', function ($scope, $http, $interval, NgMap
 
 
 
+  var updateVehiclesOnMap = function(data, isRefresh){
+    var numNew = 0;
+    var numChanged = 0;
+
+    for(var i=0; i < data.length; i++) {
+      var vehicle = data[i];
+
+      var newPosition = new google.maps.LatLng(parseFloat(vehicle.lat), parseFloat(vehicle.lon));
+
+      if(newPosition.lat() < bounds.north && newPosition.lat() > bounds.south && newPosition.lng() < bounds.east && newPosition.lng() > bounds.west){
+        var locationAge = vehicle.secsSinceReport;
+        var arrowDirection = vehicle.heading;
+        //var vehicleColor = '#008900';//'#000000';
+        var vehicleArrow;
+
+        //var arrowOpacity = (100 - 5 / 3 * locationAge) / 100;
+        var arrowOpacity = (100 - Math.pow(1.6, locationAge/3)) / 100;
+        var strokeOpacity = 0;
+        if (arrowOpacity < 0) { 
+          arrowOpacity = 0;
+          strokeOpacity = 1;
+        } else if (arrowOpacity < 0.2) {
+          strokeOpacity = 1;
+        } else {
+          strokeOpacity = 0;
+        }
+
+        arrowOptions.icon.rotation = parseFloat(arrowDirection);
+        arrowOptions.title = 'Route: ' + vehicle.routeId + '\nVehicle ID: ' + vehicle.id + '\nUpdate: ' + vehicle.secsSinceReport;
+
+        //New Vehicle to add to the Map
+        if (!(vehicle.id in $scope.vehicles)) {
+          numNew = numNew+1;
+          $scope.vehicles[vehicle.id] = {
+            id: vehicle.id,
+            lat: vehicle.lat,
+            lon: vehicle.lon,
+            /*position: [vehicle.lat, vehicle.lon],*/
+            routeId: vehicle.routeId,
+            heading: arrowDirection,
+            secsSinceReport: locationAge,
+          };
+
+          //Set circle options and create circle
+          arrowOptions.position = newPosition;
+          //arrowOptions.icon.fillColor = vehicleColor;
+          arrowOptions.icon.fillOpacity = arrowOpacity;
+          arrowOptions.icon.strokeOpacity = strokeOpacity;
+          //arrows[vehicle.id] = new google.maps.Marker(arrowOptions);
+          arrows[vehicle.id] = new SlidingMarker(arrowOptions);
+          vehicleArrow = arrows[vehicle.id];
+          //arrows[vehicle.id].setMap(map);
+
+          /*google.maps.event.addListener(vehicleArrow, 'mouseover', (function(vehicleArrow, vehicle) {
+            return function() {
+              //Set info window details an create
+              infoWindow.setContent('<p><b>Route: </b> ' + vehicle.routeId + '</p><p><b>Vehicle ID:</b> ' + vehicle.id + '</p><b>Update :</b> ' + vehicle.secsSinceReport + '</p>');
+              infoWindow.setPosition(vehicleArrow.getPosition());
+              infoWindow.open(map);
+            };
+          })(vehicleArrow, vehicle));*/
+
+          //console.log('New Vehicle: ', $scope.vehicles[vehicle.id]);
+        } else {
+          //Vehicle has moved
+          if ($scope.vehicles[vehicle.id].lat !== vehicle.lat){
+            numChanged = numChanged+1;
+
+            $scope.vehicles[vehicle.id] = {
+              id: vehicle.id,
+              lat: vehicle.lat,
+              lon: vehicle.lon,
+              /*position: [vehicle.lat, vehicle.lon],*/
+              routeId: vehicle.routeId,
+              heading: arrowDirection,
+              secsSinceReport: locationAge,
+            };
+
+            arrowOptions.icon.fillOpacity = arrowOpacity;
+            arrowOptions.icon.strokeOpacity = strokeOpacity;
+            arrows[vehicle.id].setIcon(arrowOptions.icon);
+            arrows[vehicle.id].setTitle(arrowOptions.title);
+            if (isRefresh){
+              arrows[vehicle.id].setDuration(10);
+              arrows[vehicle.id].setPosition(newPosition);
+              arrows[vehicle.id].setDuration(animationDuration);
+            }else{
+              arrows[vehicle.id].setPosition(newPosition);
+            }
+            /*arrows[vehicle.id].setOptions({
+              position: newPosition,
+              icon: arrowOptions.icon
+            });*/             
+
+            vehicleArrow = arrows[vehicle.id];
+
+            /*google.maps.event.addListener(vehicleArrow, 'mouseover', (function(vehicleArrow, vehicle) {
+              return function() {
+                //Set info window details an create
+                infoWindow.setContent('<p><b>Route: </b> ' + vehicle.routeId + '</p><p><b>Vehicle ID:</b> ' + vehicle.id + '</p><b>Update :</b> ' + vehicle.secsSinceReport + '</p>');
+                infoWindow.setPosition(vehicleArrow.getPosition());
+                infoWindow.open(map);
+              };
+            })(vehicleArrow, vehicle));*/
+
+            //console.log('Existing Vehicle Changed: ', $scope.vehicles[vehicle.id]);
+          } else {
+            arrowOptions.icon.fillOpacity = arrowOpacity;
+            arrowOptions.icon.strokeOpacity = strokeOpacity;
+            arrows[vehicle.id].setIcon(arrowOptions.icon);
+            arrows[vehicle.id].setTitle(arrowOptions.title);
+
+            vehicleArrow = arrows[vehicle.id];
+
+            /*google.maps.event.addListener(vehicleArrow, 'mouseover', (function(vehicleArrow, vehicle) {
+              return function() {
+                //Set info window details an create
+                infoWindow.setContent('<p><b>Route: </b> ' + vehicle.routeId + '</p><p><b>Vehicle ID:</b> ' + vehicle.id + '</p><b>Update :</b> ' + vehicle.secsSinceReport + '</p>');
+                infoWindow.setPosition(vehicleArrow.getPosition());
+                infoWindow.open(map);
+              };
+            })(vehicleArrow, vehicle));*/
+          }
+        }
+      }
+    }
+
+    finishTime = new Date();
+    console.log(Object.keys($scope.vehicles).length, 'numNew: ', numNew, 'numChanged: ', numChanged, 'Finish Duration - ', finishTime - startTime, 'Calc Duration - ', finishTime - dataFinishTime);
+  };
+
   $scope.getAllVehicles2 = function(){
     //$http.get('http://webservices.nextbus.com/service/publicXMLFeed?command=vehicleLocations&a=ttc&t=0')
-    var startTime = new Date();
-    var dataFinishTime;
-    var finishTime;
+    startTime = new Date();
     console.log('start');
-    //Get bounds of map
-    var mapBounds = null;
-    var northBound = null;
-    var eastBound = null;
-    var southBound = null;
-    var westBound = null;
 
     NgMap.getMap().then(function(map) {
       //set the map where the circles are to be rendered
       arrowOptions.map = map;
 
-      //get visible map bounds
-      mapBounds = map.getBounds();
-      northBound = mapBounds.getNorthEast().lat(); // LatLng of the north-east corner
-      eastBound = mapBounds.getNorthEast().lng(); // LatLng of the north-east corner
-      southBound = mapBounds.getSouthWest().lat(); // LatLng of the north-east corner
-      westBound = mapBounds.getSouthWest().lng(); // LatLng of the north-east corner
-      //console.log(northBound, eastBound, southBound, westBound);
+      getBorder(map);
 
       $http.get('http://restbus.info/api/agencies/ttc/vehicles')
         .success(function(data){
           dataFinishTime = new Date();
+          vehicleData = data;
           console.log('data returned - ', dataFinishTime - startTime);
-          var numNew = 0;
-          var numChanged = 0;
 
-          for(var i=0; i < data.length; i++) {
-            var vehicle = data[i];
-            var newPosition = new google.maps.LatLng(parseFloat(vehicle.lat), parseFloat(vehicle.lon));
-           
-            var locationAge = vehicle.secsSinceReport;
-            var arrowDirection = vehicle.heading;
-            //var vehicleColor = '#008900';//'#000000';
-            var vehicleArrow;
-
-            //var arrowOpacity = (100 - 5 / 3 * locationAge) / 100;
-            var arrowOpacity = (100 - Math.pow(1.6, locationAge/3)) / 100;
-            var strokeOpacity = 0;
-            if (arrowOpacity < 0) { 
-              arrowOpacity = 0;
-              strokeOpacity = 1;
-            } else if (arrowOpacity < 0.2) {
-              strokeOpacity = 1;
-            } else {
-              strokeOpacity = 0;
-            }
-
-            arrowOptions.icon.rotation = parseFloat(arrowDirection);
-            arrowOptions.title = 'Route: ' + vehicle.routeId + '\nVehicle ID: ' + vehicle.id + '\nUpdate: ' + vehicle.secsSinceReport;
-
-            //New Vehicle to add to the Map
-            if (!(vehicle.id in $scope.vehicles)) {
-              numNew = numNew+1;
-              $scope.vehicles[vehicle.id] = {
-                id: vehicle.id,
-                lat: vehicle.lat,
-                lon: vehicle.lon,
-                /*position: [vehicle.lat, vehicle.lon],*/
-                routeId: vehicle.routeId,
-                heading: arrowDirection,
-                secsSinceReport: locationAge,
-              };
-
-              //Set circle options and create circle
-              arrowOptions.position = newPosition;
-              //arrowOptions.icon.fillColor = vehicleColor;
-              arrowOptions.icon.fillOpacity = arrowOpacity;
-              arrowOptions.icon.strokeOpacity = strokeOpacity;
-              //arrows[vehicle.id] = new google.maps.Marker(arrowOptions);
-              arrows[vehicle.id] = new SlidingMarker(arrowOptions);
-              vehicleArrow = arrows[vehicle.id];
-              //arrows[vehicle.id].setMap(map);
-
-              /*google.maps.event.addListener(vehicleArrow, 'mouseover', (function(vehicleArrow, vehicle) {
-                return function() {
-                  //Set info window details an create
-                  infoWindow.setContent('<p><b>Route: </b> ' + vehicle.routeId + '</p><p><b>Vehicle ID:</b> ' + vehicle.id + '</p><b>Update :</b> ' + vehicle.secsSinceReport + '</p>');
-                  infoWindow.setPosition(vehicleArrow.getPosition());
-                  infoWindow.open(map);
-                };
-              })(vehicleArrow, vehicle));*/
-
-              //console.log('New Vehicle: ', $scope.vehicles[vehicle.id]);
-            } else {
-              //Vehicle has moved
-              if ($scope.vehicles[vehicle.id].lat !== vehicle.lat){
-                numChanged = numChanged+1;
-
-                $scope.vehicles[vehicle.id] = {
-                  id: vehicle.id,
-                  lat: vehicle.lat,
-                  lon: vehicle.lon,
-                  /*position: [vehicle.lat, vehicle.lon],*/
-                  routeId: vehicle.routeId,
-                  heading: arrowDirection,
-                  secsSinceReport: locationAge,
-                };
-
-                arrowOptions.icon.fillOpacity = arrowOpacity;
-                arrowOptions.icon.strokeOpacity = strokeOpacity;
-                arrows[vehicle.id].setPosition(newPosition);
-                arrows[vehicle.id].setIcon(arrowOptions.icon);
-                /*arrows[vehicle.id].setOptions({
-                  position: newPosition,
-                  icon: arrowOptions.icon
-                });*/             
-
-                vehicleArrow = arrows[vehicle.id];
-
-                /*google.maps.event.addListener(vehicleArrow, 'mouseover', (function(vehicleArrow, vehicle) {
-                  return function() {
-                    //Set info window details an create
-                    infoWindow.setContent('<p><b>Route: </b> ' + vehicle.routeId + '</p><p><b>Vehicle ID:</b> ' + vehicle.id + '</p><b>Update :</b> ' + vehicle.secsSinceReport + '</p>');
-                    infoWindow.setPosition(vehicleArrow.getPosition());
-                    infoWindow.open(map);
-                  };
-                })(vehicleArrow, vehicle));*/
-
-                //console.log('Existing Vehicle Changed: ', $scope.vehicles[vehicle.id]);
-              } else {
-                arrowOptions.icon.fillOpacity = arrowOpacity;
-                arrowOptions.icon.strokeOpacity = strokeOpacity;
-                arrows[vehicle.id].setIcon(arrowOptions.icon);
-
-                vehicleArrow = arrows[vehicle.id];
-
-                /*google.maps.event.addListener(vehicleArrow, 'mouseover', (function(vehicleArrow, vehicle) {
-                  return function() {
-                    //Set info window details an create
-                    infoWindow.setContent('<p><b>Route: </b> ' + vehicle.routeId + '</p><p><b>Vehicle ID:</b> ' + vehicle.id + '</p><b>Update :</b> ' + vehicle.secsSinceReport + '</p>');
-                    infoWindow.setPosition(vehicleArrow.getPosition());
-                    infoWindow.open(map);
-                  };
-                })(vehicleArrow, vehicle));*/
-              }
-            }
-          }
-
-          finishTime = new Date();
-          console.log(Object.keys($scope.vehicles).length, 'numNew: ', numNew, 'numChanged: ', numChanged, 'Finish Duration - ', finishTime - startTime, 'Calc Duration - ', finishTime - dataFinishTime);
+          updateVehiclesOnMap(vehicleData, false);
+          
         });
     });
   };
 
+  $scope.vehicleRefresh = function(){
+    if(arrowOptions.map && vehicleData){
+      startTime = new Date();
+      console.log('refresh start');
+
+      getBorder(arrowOptions.map);
+
+      //if(edge.north < bounds.north && edge.south > bounds.south && edge.east < bounds.east && edge.west > bounds.west){
+        dataFinishTime = new Date();
+        console.log('data returned - ', dataFinishTime - startTime);
+
+        updateVehiclesOnMap(vehicleData, true);
+      //}
+    }
+  };
   
   $scope.getAllVehicles2();
-  $interval($scope.getAllVehicles2, 3500);
+  $interval($scope.getAllVehicles2, animationDuration+250);
 });
