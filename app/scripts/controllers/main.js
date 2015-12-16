@@ -269,14 +269,14 @@ mainControllers.controller('MainCtrl', function ($scope, $http, $interval, NgMap
           vehicleArrow = arrows[vehicle.id];
           //arrows[vehicle.id].setMap(map);
 
-          /*google.maps.event.addListener(vehicleArrow, 'mouseover', (function(vehicleArrow, vehicle) {
+          google.maps.event.addListener(vehicleArrow, 'click', (function(vehicleArrow, vehicle) {
             return function() {
               //Set info window details an create
               infoWindow.setContent('<p><b>Route: </b> ' + vehicle.routeId + '</p><p><b>Vehicle ID:</b> ' + vehicle.id + '</p><b>Update :</b> ' + vehicle.secsSinceReport + '</p>');
               infoWindow.setPosition(vehicleArrow.getPosition());
-              infoWindow.open(map);
+              infoWindow.open(vehicleArrow.map);
             };
-          })(vehicleArrow, vehicle));*/
+          })(vehicleArrow, vehicle));
 
           //console.log('New Vehicle: ', $scope.vehicles[vehicle.id]);
         } else {
@@ -312,14 +312,14 @@ mainControllers.controller('MainCtrl', function ($scope, $http, $interval, NgMap
 
             vehicleArrow = arrows[vehicle.id];
 
-            /*google.maps.event.addListener(vehicleArrow, 'mouseover', (function(vehicleArrow, vehicle) {
+            google.maps.event.addListener(vehicleArrow, 'click', (function(vehicleArrow, vehicle) {
               return function() {
                 //Set info window details an create
                 infoWindow.setContent('<p><b>Route: </b> ' + vehicle.routeId + '</p><p><b>Vehicle ID:</b> ' + vehicle.id + '</p><b>Update :</b> ' + vehicle.secsSinceReport + '</p>');
                 infoWindow.setPosition(vehicleArrow.getPosition());
-                infoWindow.open(map);
+                infoWindow.open(vehicleArrow.map);
               };
-            })(vehicleArrow, vehicle));*/
+            })(vehicleArrow, vehicle));
 
             //console.log('Existing Vehicle Changed: ', $scope.vehicles[vehicle.id]);
           } else {
@@ -330,14 +330,14 @@ mainControllers.controller('MainCtrl', function ($scope, $http, $interval, NgMap
 
             vehicleArrow = arrows[vehicle.id];
 
-            /*google.maps.event.addListener(vehicleArrow, 'mouseover', (function(vehicleArrow, vehicle) {
+            google.maps.event.addListener(vehicleArrow, 'click', (function(vehicleArrow, vehicle) {
               return function() {
                 //Set info window details an create
                 infoWindow.setContent('<p><b>Route: </b> ' + vehicle.routeId + '</p><p><b>Vehicle ID:</b> ' + vehicle.id + '</p><b>Update :</b> ' + vehicle.secsSinceReport + '</p>');
                 infoWindow.setPosition(vehicleArrow.getPosition());
-                infoWindow.open(map);
+                infoWindow.open(vehicleArrow.map);
               };
-            })(vehicleArrow, vehicle));*/
+            })(vehicleArrow, vehicle));
           }
         }
       }

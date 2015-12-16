@@ -19,8 +19,8 @@
         <ng-map 
           zoom="15" 
           max-Zoom="17" 
-          min-Zoom="15" 
-          center="43.65012, -79.390945" 
+          min-Zoom="12" 
+          center= "43.65012, -79.390945" 
           default-style="false"
           pan-control="true"
           pan-control-options="{position:'BOTTOM_CENTER'}"
@@ -32,6 +32,7 @@
           street-view-control-options="{position:'RIGHT_BOTTOM'}"
           scale-control="true"
           on-idle="vehicleRefresh()">  
+          <!-- "43.65012, -79.390945" --> 
         <!-- on-zoom_changed="vm.zoomChanged()"
         on-center-changed="vm.centerChanged()"
         on-click="vm.getRadius()"

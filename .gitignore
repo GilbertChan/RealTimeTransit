@@ -4,3 +4,4 @@ dist
 .sass-cache
 bower_components
 temp.js
+jquery.easing.1.3.js
